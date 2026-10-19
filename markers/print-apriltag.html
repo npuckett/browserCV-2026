@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Printable AprilTags</title>
+  <style>
+    :root { --ink: #111; --muted: #666; --line: #ccc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.4 system-ui, sans-serif; color: var(--ink); background: #fff; }
+    .controls { padding: 16px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
+    .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+    .controls input { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; width: 90px; }
+    .controls button { font: inherit; padding: 8px 14px; border: 0; border-radius: 6px; background: var(--ink); color: #fff; cursor: pointer; }
+    .note { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--muted); }
+    .sheet { padding: 10mm; display: flex; flex-wrap: wrap; gap: 10mm; }
+    .tag { display: flex; flex-direction: column; align-items: center; gap: 2mm; break-inside: avoid; }
+    /* The source images are 10 × 10 pixels: keep the edges sharp when scaled up. */
+    .tag img { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+    .tag span { font-size: 10pt; color: var(--muted); }
+    @media print {
+      .controls { display: none; }
+      .sheet { padding: 0; }
+      @page { margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <label>First id <input id="first" type="number" min="0" max="15" value="0"></label>
+    <label>Count <input id="count" type="number" min="1" max="16" value="6"></label>
+    <label>Size (mm) <input id="size" type="number" min="10" max="190" value="60"></label>
+    <button id="print">Print</button>
+    <p class="note">Family tag36h11, ids 0–15 (the images are bundled in <code>markers/apriltag-36h11/</code>; all 587 ids are in <a href="https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11">AprilRobotics/apriltag-imgs</a>). The size is the black square. Print at 100% scale and measure one tag: the pose examples need its real size.</p>
+  </div>
+  <div class="sheet" id="sheet"></div>
+
+  <script>
+    const firstInput = document.getElementById('first');
+    const countInput = document.getElementById('count');
+    const sizeInput = document.getElementById('size');
+
+    function render() {
+      const sheet = document.getElementById('sheet');
+      sheet.innerHTML = '';
+      const first = Number(firstInput.value);
+      const last = Math.min(15, first + Number(countInput.value) - 1);
+      const sizeMm = Number(sizeInput.value);
+      // Each image is 10 px: a 1 px white border around an 8 px black square.
+      const totalMm = sizeMm * 10 / 8;
+      for (let id = first; id <= last; id += 1) {
+        const box = document.createElement('div');
+        box.className = 'tag';
+        const img = document.createElement('img');
+        img.src = 'apriltag-36h11/tag36_11_' + String(id).padStart(5, '0') + '.png';
+        img.alt = 'AprilTag 36h11 id ' + id;
+        img.style.width = totalMm + 'mm';
+        img.style.height = totalMm + 'mm';
+        const label = document.createElement('span');
+        label.textContent = 'tag36h11 · id ' + id + ' · ' + sizeMm + ' mm';
+        box.append(img, label);
+        sheet.appendChild(box);
+      }
+    }
+
+    [firstInput, countInput, sizeInput].forEach((input) => input.addEventListener('input', render));
+    document.getElementById('print').addEventListener('click', () => window.print());
+    render();
+  </script>
+</body>
+</html>

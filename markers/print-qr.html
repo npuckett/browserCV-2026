@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Printable QR Markers</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <style>
+    :root { --ink: #111; --muted: #666; --line: #ccc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.4 system-ui, sans-serif; color: var(--ink); background: #fff; }
+    .controls { padding: 16px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
+    .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+    .controls textarea, .controls input { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; }
+    .controls textarea { width: min(320px, 90vw); height: 110px; }
+    .controls input[type=number] { width: 90px; }
+    .controls button { font: inherit; padding: 8px 14px; border: 0; border-radius: 6px; background: var(--ink); color: #fff; cursor: pointer; }
+    .note { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--muted); }
+    .sheet { padding: 10mm; display: flex; flex-wrap: wrap; gap: 10mm; }
+    .code { display: flex; flex-direction: column; align-items: center; gap: 2mm; break-inside: avoid; }
+    .code svg { display: block; }
+    .code span { font-size: 10pt; color: var(--muted); max-width: 60mm; overflow-wrap: anywhere; text-align: center; }
+    @media print {
+      .controls { display: none; }
+      .sheet { padding: 0; }
+      @page { margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <label>One code per line
+      <textarea id="contents">red
+blue
+#ff8800
+hello</textarea>
+    </label>
+    <label>Size (mm) <input id="size" type="number" min="15" max="190" value="50"></label>
+    <button id="print">Print</button>
+    <p class="note">The qr-markers example fills a code with the color its text names (any CSS color, like <code>red</code> or <code>#ff8800</code>) and labels it with the text. Short text makes a simpler code that is detected from farther away. Print at 100% scale.</p>
+  </div>
+  <div class="sheet" id="sheet"></div>
+
+  <script>
+    const contentsInput = document.getElementById('contents');
+    const sizeInput = document.getElementById('size');
+
+    function render() {
+      const sheet = document.getElementById('sheet');
+      sheet.innerHTML = '';
+      const lines = contentsInput.value.split('\n').map((line) => line.trim()).filter(Boolean);
+      for (const line of lines) {
+        const qr = qrcode(0, 'M'); // 0 = pick the smallest size that fits; M = medium error correction
+        qr.addData(line);
+        qr.make();
+        const box = document.createElement('div');
+        box.className = 'code';
+        // margin 4 cells is the quiet zone QR readers expect around a code.
+        box.innerHTML = qr.createSvgTag({ cellSize: 1, margin: 4, scalable: true });
+        const svg = box.querySelector('svg');
+        svg.setAttribute('width', sizeInput.value + 'mm');
+        svg.setAttribute('height', sizeInput.value + 'mm');
+        svg.setAttribute('shape-rendering', 'crispEdges');
+        const label = document.createElement('span');
+        label.textContent = line;
+        box.appendChild(label);
+        sheet.appendChild(box);
+      }
+    }
+
+    contentsInput.addEventListener('input', render);
+    sizeInput.addEventListener('input', render);
+    document.getElementById('print').addEventListener('click', () => window.print());
+    render();
+  </script>
+</body>
+</html>

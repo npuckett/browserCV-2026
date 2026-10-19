@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Printable ArUco Markers</title>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/cv.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-aruco2@2.0.0/src/aruco.js"></script>
+  <style>
+    :root { --ink: #111; --muted: #666; --line: #ccc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.4 system-ui, sans-serif; color: var(--ink); background: #fff; }
+    .controls { padding: 16px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
+    .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+    .controls input, .controls select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; }
+    .controls input[type=number] { width: 90px; }
+    .controls button { font: inherit; padding: 8px 14px; border: 0; border-radius: 6px; background: var(--ink); color: #fff; cursor: pointer; }
+    .note { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--muted); }
+    .sheet { padding: 10mm; display: flex; flex-wrap: wrap; gap: 10mm; }
+    .marker { display: flex; flex-direction: column; align-items: center; gap: 2mm; break-inside: avoid; }
+    .marker svg { display: block; }
+    .marker span { font-size: 10pt; color: var(--muted); }
+    @media print {
+      .controls { display: none; }
+      .sheet { padding: 0; }
+      @page { margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <label>Dictionary
+      <select id="dictionary">
+        <option value="ARUCO_MIP_36h12" selected>ARUCO_MIP_36h12 (used by the examples)</option>
+        <option value="ARUCO">ARUCO (original, 1024 ids)</option>
+      </select>
+    </label>
+    <label>First id <input id="first" type="number" min="0" value="0"></label>
+    <label>Count <input id="count" type="number" min="1" max="100" value="6"></label>
+    <label>Size (mm) <input id="size" type="number" min="10" max="190" value="60"></label>
+    <button id="print">Print</button>
+    <p class="note">Print at 100% scale (no "fit to page"). The size is the black square. Measure one printed marker with a ruler: pose examples need its real size. Leave the white border around each marker.</p>
+  </div>
+  <div class="sheet" id="sheet"></div>
+
+  <script>
+    const inputs = ['dictionary', 'first', 'count', 'size'].map((id) => document.getElementById(id));
+
+    function render() {
+      const [dictionaryInput, firstInput, countInput, sizeInput] = inputs;
+      const dictionary = new AR.Dictionary(dictionaryInput.value);
+      const sheet = document.getElementById('sheet');
+      sheet.innerHTML = '';
+      const sizeMm = Number(sizeInput.value);
+      for (let id = Number(firstInput.value); id < Number(firstInput.value) + Number(countInput.value); id += 1) {
+        let svg;
+        try {
+          svg = dictionary.generateSVG(id);
+        } catch (error) {
+          break; // past the last id in this dictionary
+        }
+        const box = document.createElement('div');
+        box.className = 'marker';
+        box.innerHTML = svg;
+        // generateSVG draws the code plus a one-module white quiet zone, with a
+        // viewBox of (bits + 4). Scale so the black square is sizeMm wide.
+        const element = box.querySelector('svg');
+        const viewSize = element.viewBox.baseVal.width;
+        const totalMm = sizeMm * viewSize / (viewSize - 2);
+        element.setAttribute('width', totalMm + 'mm');
+        element.setAttribute('height', totalMm + 'mm');
+        element.setAttribute('shape-rendering', 'crispEdges'); // no hairline seams between cells
+        const label = document.createElement('span');
+        label.textContent = dictionaryInput.value + ' · id ' + id + ' · ' + sizeMm + ' mm';
+        box.appendChild(label);
+        sheet.appendChild(box);
+      }
+    }
+
+    inputs.forEach((input) => input.addEventListener('input', render));
+    document.getElementById('print').addEventListener('click', () => window.print());
+    render();
+  </script>
+</body>
+</html>
