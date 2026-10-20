@@ -105,30 +105,40 @@ function drawLabels() {
   for (const box of results.boxes) {
     const cornerA = cam.mapPoint(box.x1, box.y1);
     const cornerB = cam.mapPoint(box.x2, box.y2);
-    const x = Math.min(cornerA.x, cornerB.x);
-    const y = Math.min(cornerA.y, cornerB.y);
     const label = box.name + ' ' + round(box.conf * 100) + '%';
+    const labelWidth = textWidth(label) + 12;
+    // Keep the label on screen when the object touches an edge.
+    const x = constrain(Math.min(cornerA.x, cornerB.x), 0, width - labelWidth);
+    const y = Math.max(Math.min(cornerA.y, cornerB.y), 22);
     noStroke();
     fill(box.color);
-    rect(x, y - 22, textWidth(label) + 12, 22, 4);
+    rect(x, y - 22, labelWidth, 22, 4);
     fill(0);
     text(label, x + 6, y - 11);
   }
 }
 
 function drawPanel() {
+  const speed = results ? round(results.speed.inference) + ' ms' : '–';
+  const count = results ? results.boxes.length : 0;
+  const found = count + ' objects cover ' + round(coverage * 100) + '%';
+  const details = (modelDevice || '…') + ' · ' + speed + ' · tap: ' + (showVideo ? 'masks only' : 'show video');
+  // On a phone the whole line is too long for the screen, so it splits in two.
+  let lines;
+  if (!cam.ready) lines = ['Waiting for camera'];
+  else if (width < 520) lines = [found, details];
+  else lines = [found + ' · ' + details];
+
+  const panelHeight = 32 + lines.length * 20;
   noStroke();
   fill(10, 13, 18, 220);
-  rect(0, height - 52, width, 52);
+  rect(0, height - panelHeight, width, panelHeight);
   fill(247);
   textAlign(LEFT, CENTER);
   textSize(15);
-  const speed = results ? round(results.speed.inference) + ' ms' : '–';
-  const count = results ? results.boxes.length : 0;
-  const message = cam.ready
-    ? count + ' objects cover ' + round(coverage * 100) + '% · ' + (modelDevice || '…') + ' · ' + speed + ' · tap: ' + (showVideo ? 'masks only' : 'show video')
-    : 'Waiting for camera';
-  text(message, 16, height - 26);
+  for (let i = 0; i < lines.length; i += 1) {
+    text(lines[i], 16, height - panelHeight + 26 + i * 20);
+  }
 }
 
 function mousePressed() {
