@@ -179,7 +179,7 @@ vendor/apriltag/     AprilTag WebAssembly build (must be same-origin)
 | [frame.js](shared/frame.js) | p5 (most functions also in three.js pages) | `drawPhoneCamera()`, `grabFrame()` (downscaled ImageData), `mapFramePoint()`, `canvasToVideo()`, `drawOverCamera()`, `isNewFrame()` |
 | [camera-switch.js](shared/camera-switch.js) | p5 | Front/rear camera button for a `PhoneCamera`, adapted from p5-phone's ml5 examples |
 | [loading.js](shared/loading.js) | p5 | Spinner, progress bar and error panel drawn on the canvas, adapted from p5-phone's `ml5-loading.js` |
-| [status-overlay.js](shared/status-overlay.js) | three.js | The same, as a page overlay |
+| [status-overlay.js](shared/status-overlay.js) | three.js | The same, as a page overlay, plus `showCameraOff()` for when the camera does not start |
 | [three-helpers.js](shared/three-helpers.js) | three.js | `matchCameraToVideo()`, `makeLabel()`, `IS_PHONE` |
 
 ## Writing a new example

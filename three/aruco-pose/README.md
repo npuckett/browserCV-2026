@@ -6,6 +6,8 @@ Places a three.js cube on every ArUco marker the camera sees, sitting on the pap
 
 Print markers from [`markers/print-aruco.html`](../../markers/print-aruco.html) (`ARUCO_MIP_36h12`), measure one, and set `MARKER_SIZE`.
 
+If the camera does not start, the page says how to turn it on and shows one cube on its own. three-phone calls `userSetupComplete()` after the tap, even when the person taps "Don't Allow". `window.cameraEnabled` is false then.
+
 ## Key data
 
 - `posit.pose(corners)` returns `{ bestRotation, bestTranslation, bestError, alternativeRotation, ... }`.

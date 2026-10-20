@@ -22,6 +22,7 @@ Checked on 2026-10-08 against the published packages, their source files and the
 ## p5-phone and three-phone
 
 - `PhoneCamera.onReady(cb)` stores one callback. A second call replaces the first, so shared helpers must not use it.
+- three-phone 0.2.0 calls a global `userSetupComplete()` after the camera tap. It does this even when the camera did not start: refused, missing, or no `getUserMedia`. `window.cameraEnabled` is false then. three-phone only logs `PhoneCamera init failed: ...` and removes its tap overlay, so the page goes blank unless it shows a message of its own. `showCameraOff()` in `shared/status-overlay.js` is that message.
 - With p5.js 2.2.3, `image(cam, ...)` draws correctly but logs a friendly-error warning on every frame. The examples draw the feed with `drawPhoneCamera(cam)` from `shared/frame.js`, the same helper p5-phone's ml5 examples use.
 - Enabling the camera logs one friendly-error warning about `createCapture()`'s second parameter. It is harmless.
 - In three.js pages (no p5), ml5 constructors return a Promise: `model = await ml5.handPose(options)`. In p5 sketches, start detection from ml5's ready callback.

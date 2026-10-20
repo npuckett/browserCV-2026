@@ -8,6 +8,7 @@
 //   showStatus('Downloading', 0.4)     ... with a progress bar (0..1)
 //   hideStatus()
 //   showError('Not supported here')    a message that stays
+//   showCameraOff()                    the camera did not start: how to turn it on
 // ==============================================
 
 let cvStatusElement = null;
@@ -26,6 +27,7 @@ function cvStatusEnsure() {
     .cv-status.error .cv-status-ring, .cv-status.error .cv-status-bar { display: none; }
     .cv-status.error { pointer-events: auto; }
     .cv-status.error .cv-status-message { max-width: 460px; background: #1e222c; padding: 20px; border-radius: 10px; }
+    .cv-status.camera-off { background: none; justify-content: flex-start; pointer-events: none; }
     @keyframes cv-status-spin { to { transform: rotate(360deg); } }`;
   document.head.appendChild(style);
   cvStatusElement = document.createElement('div');
@@ -37,7 +39,7 @@ function cvStatusEnsure() {
 
 function showStatus(message, progress) {
   const element = cvStatusEnsure();
-  element.classList.remove('error');
+  element.classList.remove('error', 'camera-off');
   element.querySelector('.cv-status-message').textContent = message;
   const bar = element.querySelector('.cv-status-bar');
   bar.style.display = typeof progress === 'number' ? 'block' : 'none';
@@ -51,8 +53,19 @@ function hideStatus() {
 
 function showError(message) {
   const element = cvStatusEnsure();
+  element.classList.remove('camera-off');
   element.classList.add('error');
   element.querySelector('.cv-status-message').textContent = message;
   element.style.display = 'flex';
   console.error(message);
+}
+
+// The camera did not start: the person tapped "Don't Allow", or there is no
+// camera. The message sits at the top, so the scene behind it stays in view.
+function showCameraOff() {
+  const canAsk = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+  showError(canAsk
+    ? 'The camera is off. To turn it on, allow the camera for this page in your browser settings. Then reload the page.'
+    : 'This browser cannot open the camera. Open this page in Chrome or Safari.');
+  cvStatusElement.classList.add('camera-off');
 }

@@ -9,7 +9,7 @@
 // of the black square, in meters.
 //
 // three-phone APIs: createPhoneCamera(), cam.attachBackground(),
-// enableCameraTap(), setPhoneCanvas(), lockGestures().
+// enableCameraTap(), setPhoneCanvas(), lockGestures(), userSetupComplete().
 //
 // Key data:
 //   detection.pose.R   3×3 rotation, stored column by column (R[col][row])
@@ -64,6 +64,18 @@ async function startDetector() {
     detectorReady = true;
     hideStatus();
   }));
+}
+
+// three-phone calls this after the tap, also when the camera did not start.
+function userSetupComplete() {
+  if (window.cameraEnabled) return;
+  showCameraOff();
+  // Show one pillar on its own, so the page is not empty.
+  const anchor = anchors[0] || createAnchor(0);
+  anchor.matrix.makeRotationFromEuler(new THREE.Euler(-0.9, 0, 0.6)); // lying on a table, turned a little
+  anchor.matrix.setPosition(0, -0.03, -0.45); // 45 cm in front of the camera
+  anchor.matrixWorldNeedsUpdate = true;
+  anchor.visible = true;
 }
 
 function animate() {
@@ -161,6 +173,9 @@ function onResize() {
   if (cam.ready) {
     matchCameraToVideo(camera, cam, renderer, CAMERA_FOV_DEGREES);
     cam.updateBackground();
+  } else {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
   }
 }
 

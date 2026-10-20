@@ -6,6 +6,8 @@ Stands a three.js pillar and label on every AprilTag (tag36h11) the camera sees.
 
 Print tags from [`markers/print-apriltag.html`](../../markers/print-apriltag.html), measure one, and set `TAG_SIZE` (meters).
 
+If the camera does not start, the page says how to turn it on and shows one pillar on its own. three-phone calls `userSetupComplete()` after the tap, even when the person taps "Don't Allow". `window.cameraEnabled` is false then.
+
 ## Key data
 
 - `detector.set_camera_info(fx, fy, cx, cy)`: the camera's focal length and center, in pixels of the frame sent to the detector. Without a calibration, the focal length comes from `CAMERA_FOV_DEGREES` through `matchCameraToVideo()`.
