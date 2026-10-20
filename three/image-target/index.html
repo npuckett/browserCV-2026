@@ -6,7 +6,7 @@
   <title>Image Target · Computer Vision with JavaScript</title>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #101318; font-family: system-ui, sans-serif; }
-    #container { position: absolute; inset: 0; }
+    #container { position: absolute; inset: 0; z-index: 0; } /* its own layer, so the camera picture MindAR puts at z-index -2 shows above the page background */
     #start { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; gap: 14px;
       align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.8); color: #fff; text-align: center; padding: 24px; }
     #start button { font: 700 17px system-ui, sans-serif; padding: 14px 22px; border: 0; border-radius: 10px; background: #fff; color: #111; }
